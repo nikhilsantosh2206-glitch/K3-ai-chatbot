@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>K3 AI Chat</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f7f7f8;
+            color: #202123;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ================================
+           APP
+        ================================= */
+
+        .app {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* ================================
+           SIDEBAR
+        ================================= */
+
+        .sidebar {
+            width: 270px;
+            background: #171717;
+            color: white;
+
+            display: flex;
+            flex-direction: column;
+
+            padding: 15px;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+
+        .new-chat {
+            width: 100%;
+            padding: 12px;
+
+            border: 1px solid #444;
+            background: #222;
+            color: white;
+
+            border-radius: 8px;
+            cursor: pointer;
+
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .new-chat:hover {
+            background: #333;
+        }
+
+        .sessions {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .session {
+            padding: 11px;
+
+            border-radius: 7px;
+            cursor: pointer;
+
+            margin-bottom: 5px;
+            font-size: 14px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .session:hover {
+            background: #2a2a2a;
+        }
+
+        .session.active {
+            background: #343434;
+        }
+
+        .session-title {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            max-width: 190px;
+        }
+
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .delete-btn:hover {
+            color: white;
+        }
+
+        /* ================================
+           MAIN
+        ================================= */
+
+        .main {
+            flex: 1;
+
+            display: flex;
+            flex-direction: column;
+
+            height: 100vh;
+        }
+
+        /* ================================
+           HEADER
+        ================================= */
+
+        .header {
+            height: 60px;
+
+            background: white;
+
+            border-bottom: 1px solid #ddd;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* ================================
+           CHAT
+        ================================= */
+
+        .chat-container {
+            flex: 1;
+
+            overflow-y: auto;
+
+            padding: 30px 20px;
+        }
+
+        .welcome {
+            max-width: 800px;
+
+            margin: 80px auto;
+
+            text-align: center;
+        }
+
+        .welcome-icon {
+            font-size: 55px;
+            margin-bottom: 15px;
+        }
+
+        .welcome h1 {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        .welcome p {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+
+        .features {
+            display: flex;
+
+            justify-content: center;
+
+            gap: 12px;
+
+            flex-wrap: wrap;
+        }
+
+        .feature {
+            background: white;
+
+            border: 1px solid #ddd;
+
+            border-radius: 10px;
+
+            padding: 12px 18px;
+
+            color: #555;
+
+            font-size: 13px;
+        }
+
+        /* ================================
+           MESSAGES
+        ================================= */
+
+        .message {
+            max-width: 850px;
+
+            margin: 0 auto 25px auto;
+
+            display: flex;
+
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+
+            border-radius: 50%;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            font-weight: bold;
+
+            flex-shrink: 0;
+        }
+
+        .user-avatar {
+            background: #2563eb;
+            color: white;
+        }
+
+        .ai-avatar {
+            background: #111827;
+            color: white;
+
+            font-size: 11px;
+        }
+
+        .message-content {
+            line-height: 1.7;
+
+            white-space: pre-wrap;
+
+            word-wrap: break-word;
+
+            flex: 1;
+
+            padding-top: 5px;
+        }
+
+        /* ================================
+           INPUT
+        ================================= */
+
+        .input-area {
+            padding: 15px 20px 5px;
+
+            background: white;
+
+            border-top: 1px solid #ddd;
+        }
+
+        .input-box {
+            max-width: 850px;
+
+            margin: auto;
+
+            display: flex;
+
+            gap: 10px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 12px;
+
+            padding: 8px;
+
+            background: white;
+        }
+
+        #messageInput {
+            flex: 1;
+
+            border: none;
+
+            outline: none;
+
+            resize: none;
+
+            font-size: 15px;
+
+            padding: 10px;
+
+            min-height: 44px;
+
+            max-height: 150px;
+
+            font-family: inherit;
+        }
+
+        #sendBtn {
+            width: 45px;
+            height: 45px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #111827;
+
+            color: white;
+
+            cursor: pointer;
+
+            font-size: 18px;
+        }
+
+        #sendBtn:hover {
+            background: #000;
+        }
+
+        #sendBtn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
+        /* ================================
+           FOOTER
+        ================================= */
+
+        .footer {
+            text-align: center;
+
+            font-size: 12px;
+
+            color: #888;
+
+            padding: 10px;
+
+            line-height: 1.7;
+        }
+
+        .footer strong {
+            color: #333;
+
+            font-weight: 600;
+        }
+
+        /* ================================
+           MOBILE
+        ================================= */
+
+        @media (max-width: 768px) {
+
+            .sidebar {
+                width: 220px;
+            }
+
+            .welcome {
+                margin: 50px auto;
+            }
+
+            .welcome h1 {
+                font-size: 28px;
+            }
+
+            .welcome-icon {
+                font-size: 45px;
+            }
+
+            .chat-container {
+                padding: 20px 12px;
+            }
+
+            .message {
+                gap: 10px;
+            }
+
+            .feature {
+                font-size: 12px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+
+    <!-- =========================================
+         SIDEBAR
+    ========================================== -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            🤖 K3 AI
+        </div>
+
+
+        <button
+            class="new-chat"
+            onclick="createNewChat()"
+        >
+            + New Chat
+        </button>
+
+
+        <div
+            id="sessions"
+            class="sessions"
+        ></div>
+
+    </aside>
+
+
+    <!-- =========================================
+         MAIN
+    ========================================== -->
+
+    <main class="main">
+
+
+        <!-- HEADER -->
+
+        <header class="header">
+            K3 AI Chat
+        </header>
+
+
+        <!-- CHAT -->
+
+        <div
+            id="chatContainer"
+            class="chat-container"
+        >
+
+            <div
+                id="welcome"
+                class="welcome"
+            >
+
+                <div class="welcome-icon">
+                    🤖
+                </div>
+
+                <h1>
+                    Welcome to K3 AI
+                </h1>
+
+                <p>
+                    Your intelligent AI assistant
+                    powered by OpenRouter.
+                </p>
+
+
+                <div class="features">
+
+                    <div class="feature">
+                        💬 AI Chat
+                    </div>
+
+                    <div class="feature">
+                        🧠 Smart Responses
+                    </div>
+
+                    <div class="feature">
+                        ⚡ Fast AI
+                    </div>
+
+                    <div class="feature">
+                        📚 Chat History
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- INPUT -->
+
+        <div class="input-area">
+
+
+            <div class="input-box">
+
+                <textarea
+                    id="messageInput"
+                    placeholder="Message K3 AI..."
+                    rows="1"
+                ></textarea>
+
+
+                <button
+                    id="sendBtn"
+                    onclick="sendMessage()"
+                >
+                    ➤
+                </button>
+
+            </div>
+
+
+            <!-- UPDATED FOOTER -->
+
+            <div class="footer">
+
+                Built with Flask • OpenRouter API • Python
+
+                <br>
+
+                Developed by
+                <strong>Nikhil Padamtintiwar</strong>
+
+            </div>
+
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script>
+
+    // =====================================================
+    // CURRENT SESSION
+    // =====================================================
+
+    let currentSessionId = null;
+
+
+    // =====================================================
+    // LOAD SESSIONS
+    // =====================================================
+
+    async function loadSessions() {
+
+        try {
+
+            const response =
+                await fetch("/api/sessions");
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Failed to load sessions"
+                );
+
+            }
+
+
+            const sessions =
+                await response.json();
+
+
+            const container =
+                document.getElementById(
+                    "sessions"
+                );
+
+
+            container.innerHTML = "";
+
+
+            sessions.forEach(session => {
+
+                const div =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                div.className = "session";
+
+
+                if (
+                    session.id ===
+                    currentSessionId
+                ) {
+
+                    div.classList.add(
+                        "active"
+                    );
+
+                }
+
+
+                div.innerHTML = `
+
+                    <span
+                        class="session-title"
+                        title="${escapeHtml(
+                            session.title
+                        )}"
+                    >
+                        ${escapeHtml(
+                            session.title
+                        )}
+                    </span>
+
+                    <button
+                        class="delete-btn"
+                    >
+                        ✕
+                    </button>
+
+                `;
+
+
+                const deleteButton =
+                    div.querySelector(
+                        ".delete-btn"
+                    );
+
+
+                deleteButton.addEventListener(
+                    "click",
+                    function(event) {
+
+                        event.stopPropagation();
+
+                        deleteSession(
+                            session.id
+                        );
+
+                    }
+                );
+
+
+                div.addEventListener(
+                    "click",
+                    function() {
+
+                        loadSession(
+                            session.id
+                        );
+
+                    }
+                );
+
+
+                container.appendChild(div);
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Failed to load sessions:",
+                error
+            );
+
+        }
+
+    }
+
+
+    // =====================================================
+    // CREATE NEW CHAT
+    // =====================================================
+
+    async function createNewChat() {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/sessions",
+                    {
+                        method: "POST"
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Failed to create chat"
+                );
+
+            }
+
+
+            const session =
+                await response.json();
+
+
+            currentSessionId =
+                session.id;
+
+
+            clearChat();
+
+
+            await loadSessions();
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Failed to create chat:",
+                error
+            );
+
+        }
+
+    }
+
+
+    // =====================================================
+    // LOAD SESSION
+    // =====================================================
+
+    async function loadSession(id) {
+
+        try {
+
+            const response =
+                await fetch(
+                    `/api/sessions/${id}`
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Failed to load session"
+                );
+
+            }
+
+
+            const session =
+                await response.json();
+
+
+            currentSessionId =
+                id;
+
+
+            clearChat();
+
+
+            session.messages.forEach(
+                message => {
+
+                    addMessage(
+                        message.role,
+                        message.content
+                    );
+
+                }
+            );
+
+
+            await loadSessions();
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Failed to load session:",
+                error
+            );
+
+        }
+
+    }
+
+
+    // =====================================================
+    // DELETE SESSION
+    // =====================================================
+
+    async function deleteSession(id) {
+
+        try {
+
+            await fetch(
+                `/api/sessions/${id}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+
+            if (
+                currentSessionId === id
+            ) {
+
+                currentSessionId = null;
+
+                clearChat();
+
+            }
+
+
+            await loadSessions();
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Failed to delete session:",
+                error
+            );
+
+        }
+
+    }
+
+
+    // =====================================================
+    // SEND MESSAGE
+    // =====================================================
+
+    async function sendMessage() {
+
+        const input =
+            document.getElementById(
+                "messageInput"
+            );
+
+
+        const sendButton =
+            document.getElementById(
+                "sendBtn"
+            );
+
+
+        const message =
+            input.value.trim();
+
+
+        if (!message) {
+            return;
+        }
+
+
+        // Create session automatically
+
+        if (!currentSessionId) {
+
+            await createNewChat();
+
+        }
+
+
+        // Remove welcome
+
+        const welcome =
+            document.getElementById(
+                "welcome"
+            );
+
+
+        if (welcome) {
+
+            welcome.remove();
+
+        }
+
+
+        // Display user message
+
+        addMessage(
+            "user",
+            message
+        );
+
+
+        input.value = "";
+
+
+        sendButton.disabled = true;
+
+        sendButton.textContent = "…";
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `/api/sessions/${currentSessionId}/messages`,
+                    {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            message: message
+                        })
+
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "Something went wrong."
+                );
+
+            }
+
+
+            // Display AI response
+
+            addMessage(
+                "assistant",
+                data.reply
+            );
+
+
+            await loadSessions();
+
+        }
+
+        catch (error) {
+
+            addMessage(
+                "assistant",
+                "❌ Error: " +
+                error.message
+            );
+
+
+            console.error(
+                "Chat error:",
+                error
+            );
+
+        }
+
+        finally {
+
+            sendButton.disabled = false;
+
+            sendButton.textContent = "➤";
+
+            input.focus();
+
+        }
+
+    }
+
+
+    // =====================================================
+    // ADD MESSAGE
+    // =====================================================
+
+    function addMessage(
+        role,
+        content
+    ) {
+
+        const container =
+            document.getElementById(
+                "chatContainer"
+            );
+
+
+        const message =
+            document.createElement(
+                "div"
+            );
+
+
+        message.className =
+            "message";
+
+
+        const avatar =
+            document.createElement(
+                "div"
+            );
+
+
+        avatar.className =
+            "avatar " +
+            (
+                role === "user"
+                    ? "user-avatar"
+                    : "ai-avatar"
+            );
+
+
+        avatar.textContent =
+            role === "user"
+                ? "U"
+                : "K3";
+
+
+        const contentDiv =
+            document.createElement(
+                "div"
+            );
+
+
+        contentDiv.className =
+            "message-content";
+
+
+        contentDiv.textContent =
+            content;
+
+
+        message.appendChild(
+            avatar
+        );
+
+
+        message.appendChild(
+            contentDiv
+        );
+
+
+        container.appendChild(
+            message
+        );
+
+
+        container.scrollTop =
+            container.scrollHeight;
+
+    }
+
+
+    // =====================================================
+    // CLEAR CHAT
+    // =====================================================
+
+    function clearChat() {
+
+        const container =
+            document.getElementById(
+                "chatContainer"
+            );
+
+
+        container.innerHTML = `
+
+            <div
+                id="welcome"
+                class="welcome"
+            >
+
+                <div class="welcome-icon">
+                    🤖
+                </div>
+
+                <h1>
+                    Welcome to K3 AI
+                </h1>
+
+                <p>
+                    Your intelligent AI assistant
+                    powered by OpenRouter.
+                </p>
+
+                <div class="features">
+
+                    <div class="feature">
+                        💬 AI Chat
+                    </div>
+
+                    <div class="feature">
+                        🧠 Smart Responses
+                    </div>
+
+                    <div class="feature">
+                        ⚡ Fast AI
+                    </div>
+
+                    <div class="feature">
+                        📚 Chat History
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    // =====================================================
+    // ESCAPE HTML
+    // =====================================================
+
+    function escapeHtml(text) {
+
+        const div =
+            document.createElement(
+                "div"
+            );
+
+
+        div.textContent =
+            text;
+
+
+        return div.innerHTML;
+
+    }
+
+
+    // =====================================================
+    // ENTER TO SEND
+    // =====================================================
+
+    document
+        .getElementById(
+            "messageInput"
+        )
+        .addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key === "Enter" &&
+                    !event.shiftKey
+                ) {
+
+                    event.preventDefault();
+
+                    sendMessage();
+
+                }
+
+            }
+        );
+
+
+    // =====================================================
+    // INITIAL LOAD
+    // =====================================================
+
+    loadSessions();
+
+</script>
+
+
+</body>
+
+</html>
